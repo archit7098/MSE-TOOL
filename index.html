@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Status Examination Tool</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --secondary-dark: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #f5f5f5;
+            --dark: #333;
+            --gray: #95a5a6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .patient-info {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tab-button {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-button:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--light);
+            border-radius: 4px;
+            padding: 0.5rem 0.75rem;
+            transition: background-color 0.3s;
+        }
+        
+        .checkbox-item:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .checkbox-item input {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--light);
+            border-radius: 4px;
+            padding: 0.5rem 0.75rem;
+            transition: background-color 0.3s;
+        }
+        
+        .radio-item:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .radio-item input {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--secondary-dark);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        /* Report styles */
+        #report-container {
+            display: none;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: 1.5rem;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-section h3 {
+            font-size: 1.2rem;
+            color: var(--primary-dark);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 0.75rem;
+        }
+        
+        .report-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .report-item-title {
+            font-weight: 600;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            #report-container, #report-container * {
+                visibility: visible;
+            }
+            
+            #report-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+                background-color: white;
+                padding: 1cm;
+                box-shadow: none;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            header, .container, .tabs, .tab-content, .button-group {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .tab-button {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Mental Status Examination Tool</h1>
+    </header>
+    
+    <div class="container">
+        <div class="patient-info">
+            <h2>Patient Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="patient-name">Patient Name</label>
+                    <input type="text" id="patient-name" placeholder="Enter patient name">
+                </div>
+                <div class="form-group">
+                    <label for="patient-id">Patient ID</label>
+                    <input type="text" id="patient-id" placeholder="Enter patient ID">
+                </div>
+                <div class="form-group">
+                    <label for="patient-age">Age</label>
+                    <input type="number" id="patient-age" placeholder="Enter age">
+                </div>
+                <div class="form-group">
+                    <label for="patient-gender">Gender</label>
+                    <select id="patient-gender">
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Non-binary">Non-binary</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="exam-date">Examination Date</label>
+                    <input type="date" id="exam-date">
+                </div>
+                <div class="form-group">
+                    <label for="examiner-name">Examiner Name</label>
+                    <input type="text" id="examiner-name" placeholder="Enter examiner name">
+                </div>
+                <div class="form-group">
+                    <label for="referral-reason">Reason for Referral</label>
+                    <input type="text" id="referral-reason" placeholder="Enter reason for referral">
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-button active" data-tab="appearance">Appearance & Behavior</button>
+            <button class="tab-button" data-tab="mood">Mood & Affect</button>
+            <button class="tab-button" data-tab="speech">Speech & Language</button>
+            <button class="tab-button" data-tab="perception">Perception</button>
+            <button class="tab-button" data-tab="thought">Thought Process</button>
+            <button class="tab-button" data-tab="cognition">Cognition</button>
+            <button class="tab-button" data-tab="insight">Insight & Judgment</button>
+        </div>
+        
+        <!-- Appearance & Behavior Tab -->
+        <div id="appearance-tab" class="tab-content active">
+            <h3 class="section-title">General Appearance</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="appearance-well-groomed">
+                    <label for="appearance-well-groomed">Well-groomed</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="appearance-disheveled">
+                    <label for="appearance-disheveled">Disheveled</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="appearance-poor-hygiene">
+                    <label for="appearance-poor-hygiene">Poor hygiene</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="appearance-unusual-dress">
+                    <label for="appearance-unusual-dress">Unusual dress</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="appearance-appropriate-dress">
+                    <label for="appearance-appropriate-dress">Appropriately dressed</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="appearance-notes">Additional notes on appearance</label>
+                <textarea id="appearance-notes" rows="2" placeholder="Enter additional observations"></textarea>
+            </div>
+            
+            <h3 class="section-title">Behavior & Psychomotor Activity</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="behavior-calm">
+                    <label for="behavior-calm">Calm</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="behavior-restless">
+                    <label for="behavior-restless">Restless</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="behavior-agitated">
+                    <label for="behavior-agitated">Agitated</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="behavior-psychomotor-retardation">
+                    <label for="behavior-psychomotor-retardation">Psychomotor retardation</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="behavior-psychomotor-agitation">
+                    <label for="behavior-psychomotor-agitation">Psychomotor agitation</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="behavior-tremor">
+                    <label for="behavior-tremor">Tremor</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="behavior-tics">
+                    <label for="behavior-tics">Tics</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="behavior-stereotypies">
+                    <label for="behavior-stereotypies">Stereotypies</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="behavior-notes">Additional notes on behavior</label>
+                <textarea id="behavior-notes" rows="2" placeholder="Enter additional observations"></textarea>
+            </div>
+            
+            <h3 class="section-title">Attitude Toward Examiner</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="attitude-cooperative">
+                    <label for="attitude-cooperative">Cooperative</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="attitude-uncooperative">
+                    <label for="attitude-uncooperative">Uncooperative</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="attitude-guarded">
+                    <label for="attitude-guarded">Guarded</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="attitude-suspicious">
+                    <label for="attitude-suspicious">Suspicious</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="attitude-hostile">
+                    <label for="attitude-hostile">Hostile</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="attitude-seductive">
+                    <label for="attitude-seductive">Seductive</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="attitude-ingratiating">
+                    <label for="attitude-ingratiating">Ingratiating</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="attitude-notes">Additional notes on attitude</label>
+                <textarea id="attitude-notes" rows="2" placeholder="Enter additional observations"></textarea>
+            </div>
+        </div>
+        
+        <!-- Mood & Affect Tab -->
+        <div id="mood-tab" class="tab-content">
+            <h3 class="section-title">Reported Mood</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mood-euthymic">
+                    <label for="mood-euthymic">Euthymic</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mood-depressed">
+                    <label for="mood-depressed">Depressed</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mood-anxious">
+                    <label for="mood-anxious">Anxious</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mood-euphoric">
+                    <label for="mood-euphoric">Euphoric</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mood-irritable">
+                    <label for="mood-irritable">Irritable</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mood-angry">
+                    <label for="mood-angry">Angry</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mood-apathetic">
+                    <label for="mood-apathetic">Apathetic</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mood-anhedonic">
+                    <label for="mood-anhedonic">Anhedonic</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="mood-quoted">Mood as quoted</label>
+                <textarea id="mood-quoted" rows="2" placeholder="Enter patient's description of mood in their own words"></textarea>
+            </div>
+            
+            <h3 class="section-title">Observed Affect</h3>
+            <h4>Range</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="affect-range" id="affect-range-full" value="Full">
+                    <label for="affect-range-full">Full</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="affect-range" id="affect-range-restricted" value="Restricted">
+                    <label for="affect-range-restricted">Restricted</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="affect-range" id="affect-range-blunted" value="Blunted">
+                    <label for="affect-range-blunted">Blunted</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="affect-range" id="affect-range-flat" value="Flat">
+                    <label for="affect-range-flat">Flat</label>
+                </div>
+            </div>
+            
+            <h4>Intensity</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="affect-intensity" id="affect-intensity-normal" value="Normal">
+                    <label for="affect-intensity-normal">Normal</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="affect-intensity" id="affect-intensity-heightened" value="Heightened">
+                    <label for="affect-intensity-heightened">Heightened</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="affect-intensity" id="affect-intensity-diminished" value="Diminished">
+                    <label for="affect-intensity-diminished">Diminished</label>
+                </div>
+            </div>
+            
+            <h4>Appropriateness</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="affect-appropriateness" id="affect-appropriateness-appropriate" value="Appropriate">
+                    <label for="affect-appropriateness-appropriate">Appropriate</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="affect-appropriateness" id="affect-appropriateness-inappropriate" value="Inappropriate">
+                    <label for="affect-appropriateness-inappropriate">Inappropriate</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="affect-appropriateness" id="affect-appropriateness-labile" value="Labile">
+                    <label for="affect-appropriateness-labile">Labile</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="affect-notes">Additional notes on affect</label>
+                <textarea id="affect-notes" rows="2" placeholder="Enter additional observations"></textarea>
+            </div>
+        </div>
+        
+        <!-- Speech & Language Tab -->
+        <div id="speech-tab" class="tab-content">
+            <h3 class="section-title">Speech Characteristics</h3>
+            
+            <h4>Rate</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="speech-rate" id="speech-rate-normal" value="Normal">
+                    <label for="speech-rate-normal">Normal</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-rate" id="speech-rate-rapid" value="Rapid">
+                    <label for="speech-rate-rapid">Rapid</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-rate" id="speech-rate-pressured" value="Pressured">
+                    <label for="speech-rate-pressured">Pressured</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-rate" id="speech-rate-slow" value="Slow">
+                    <label for="speech-rate-slow">Slow</label>
+                </div>
+            </div>
+            
+            <h4>Volume</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="speech-volume" id="speech-volume-normal" value="Normal">
+                    <label for="speech-volume-normal">Normal</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-volume" id="speech-volume-loud" value="Loud">
+                    <label for="speech-volume-loud">Loud</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-volume" id="speech-volume-quiet" value="Quiet">
+                    <label for="speech-volume-quiet">Quiet</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-volume" id="speech-volume-whispered" value="Whispered">
+                    <label for="speech-volume-whispered">Whispered</label>
+                </div>
+            </div>
+            
+            <h4>Quantity</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="speech-quantity" id="speech-quantity-normal" value="Normal">
+                    <label for="speech-quantity-normal">Normal</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-quantity" id="speech-quantity-increased" value="Increased">
+                    <label for="speech-quantity-increased">Increased</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-quantity" id="speech-quantity-decreased" value="Decreased">
+                    <label for="speech-quantity-decreased">Decreased</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-quantity" id="speech-quantity-poverty" value="Poverty">
+                    <label for="speech-quantity-poverty">Poverty</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="speech-quantity" id="speech-quantity-mute" value="Mute">
+                    <label for="speech-quantity-mute">Mute</label>
+                </div>
+            </div>
+            
+            <h3 class="section-title">Language</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="language-fluent">
+                    <label for="language-fluent">Fluent</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="language-aphasia">
+                    <label for="language-aphasia">Aphasia</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="language-dysarthria">
+                    <label for="language-dysarthria">Dysarthria</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="language-neologisms">
+                    <label for="language-neologisms">Neologisms</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="language-word-salad">
+                    <label for="language-word-salad">Word salad</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="language-circumstantiality">
+                    <label for="language-circumstantiality">Circumstantiality</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="language-tangentiality">
+                    <label for="language-tangentiality">Tangentiality</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="language-echolalia">
+                    <label for="language-echolalia">Echolalia</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="speech-notes">Additional notes on speech and language</label>
+                <textarea id="speech-notes" rows="2" placeholder="Enter additional observations"></textarea>
+            </div>
+        </div>
+        
+        <!-- Perception Tab -->
+        <div id="perception-tab" class="tab-content">
+            <h3 class="section-title">Perceptual Disturbances</h3>
+            
+            <h4>Hallucinations</h4>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="hallucinations-none">
+                    <label for="hallucinations-none">None reported</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="hallucinations-auditory">
+                    <label for="hallucinations-auditory">Auditory</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="hallucinations-visual">
+                    <label for="hallucinations-visual">Visual</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="hallucinations-tactile">
+                    <label for="hallucinations-tactile">Tactile</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="hallucinations-olfactory">
+                    <label for="hallucinations-olfactory">Olfactory</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="hallucinations-gustatory">
+                    <label for="hallucinations-gustatory">Gustatory</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="hallucinations-command">
+                    <label for="hallucinations-command">Command hallucinations</label>
+                </div>
+            </div>
+            
+            <h4>Illusions</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="illusions" id="illusions-none" value="None" checked>
+                    <label for="illusions-none">None reported</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="illusions" id="illusions-present" value="Present">
+                    <label for="illusions-present">Present</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="perception-notes">Description of perceptual disturbances (if any)</label>
+                <textarea id="perception-notes" rows="3" placeholder="Describe hallucinations or illusions in detail, including content, frequency, intensity, and impact"></textarea>
+            </div>
+            
+            <h4>Depersonalization/Derealization</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="depersonalization" id="depersonalization-none" value="None" checked>
+                    <label for="depersonalization-none">None reported</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="depersonalization" id="depersonalization-present" value="Present">
+                    <label for="depersonalization-present">Present</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="depersonalization-notes">Description of depersonalization/derealization (if present)</label>
+                <textarea id="depersonalization-notes" rows="2" placeholder="Enter additional observations"></textarea>
+            </div>
+        </div>
+        
+        <!-- Thought Process Tab -->
+        <div id="thought-tab" class="tab-content">
+            <h3 class="section-title">Thought Process</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process
+                    
+                    <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-logical">
+                    <label for="thought-process-logical">Logical/Goal-directed</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-circumstantial">
+                    <label for="thought-process-circumstantial">Circumstantial</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-tangential">
+                    <label for="thought-process-tangential">Tangential</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-loose">
+                    <label for="thought-process-loose">Loose associations</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-flight">
+                    <label for="thought-process-flight">Flight of ideas</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-racing">
+                    <label for="thought-process-racing">Racing thoughts</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-blocking">
+                    <label for="thought-process-blocking">Thought blocking</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-perseveration">
+                    <label for="thought-process-perseveration">Perseveration</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-process-poverty">
+                    <label for="thought-process-poverty">Poverty of thought</label>
+                </div>
+            </div>
+            
+            <h3 class="section-title">Thought Content</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-normal">
+                    <label for="thought-content-normal">Normal</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-delusions">
+                    <label for="thought-content-delusions">Delusions</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-paranoia">
+                    <label for="thought-content-paranoia">Paranoia</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-preoccupations">
+                    <label for="thought-content-preoccupations">Preoccupations</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-obsessions">
+                    <label for="thought-content-obsessions">Obsessions</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-phobias">
+                    <label for="thought-content-phobias">Phobias</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-suicidal">
+                    <label for="thought-content-suicidal">Suicidal ideation</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-homicidal">
+                    <label for="thought-content-homicidal">Homicidal ideation</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-ideas-reference">
+                    <label for="thought-content-ideas-reference">Ideas of reference</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-thought-insertion">
+                    <label for="thought-content-thought-insertion">Thought insertion</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-thought-withdrawal">
+                    <label for="thought-content-thought-withdrawal">Thought withdrawal</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="thought-content-thought-broadcasting">
+                    <label for="thought-content-thought-broadcasting">Thought broadcasting</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="thought-notes">Description of thought abnormalities (if any)</label>
+                <textarea id="thought-notes" rows="3" placeholder="Describe delusions, obsessions, or other thought abnormalities in detail"></textarea>
+            </div>
+            
+            <h4>Suicidal/Homicidal Assessment</h4>
+            <div class="form-group" id="suicidal-assessment-container">
+                <label for="suicidal-assessment">Suicidal Assessment</label>
+                <textarea id="suicidal-assessment" rows="3" placeholder="Assess for ideation, plan, intent, means, protective factors, and risk level"></textarea>
+            </div>
+            
+            <div class="form-group" id="homicidal-assessment-container" style="display: none;">
+                <label for="homicidal-assessment">Homicidal Assessment</label>
+                <textarea id="homicidal-assessment" rows="3" placeholder="Assess for ideation, plan, intent, means, specific targets, and risk level"></textarea>
+            </div>
+        </div>
+        
+        <!-- Cognition Tab -->
+        <div id="cognition-tab" class="tab-content">
+            <h3 class="section-title">Level of Consciousness</h3>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="consciousness" id="consciousness-alert" value="Alert" checked>
+                    <label for="consciousness-alert">Alert</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="consciousness" id="consciousness-drowsy" value="Drowsy">
+                    <label for="consciousness-drowsy">Drowsy</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="consciousness" id="consciousness-lethargic" value="Lethargic">
+                    <label for="consciousness-lethargic">Lethargic</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="consciousness" id="consciousness-stuporous" value="Stuporous">
+                    <label for="consciousness-stuporous">Stuporous</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="consciousness" id="consciousness-comatose" value="Comatose">
+                    <label for="consciousness-comatose">Comatose</label>
+                </div>
+            </div>
+            
+            <h3 class="section-title">Orientation</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="orientation-person" checked>
+                    <label for="orientation-person">Person</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="orientation-place" checked>
+                    <label for="orientation-place">Place</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="orientation-time" checked>
+                    <label for="orientation-time">Time</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="orientation-situation" checked>
+                    <label for="orientation-situation">Situation</label>
+                </div>
+            </div>
+            
+            <h3 class="section-title">Attention and Concentration</h3>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="attention" id="attention-intact" value="Intact" checked>
+                    <label for="attention-intact">Intact</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="attention" id="attention-mildly-impaired" value="Mildly impaired">
+                    <label for="attention-mildly-impaired">Mildly impaired</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="attention" id="attention-moderately-impaired" value="Moderately impaired">
+                    <label for="attention-moderately-impaired">Moderately impaired</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="attention" id="attention-severely-impaired" value="Severely impaired">
+                    <label for="attention-severely-impaired">Severely impaired</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="attention-test">Test(s) used</label>
+                <input type="text" id="attention-test" placeholder="e.g., Digit span, Serial 7s, Spelling 'WORLD' backwards">
+            </div>
+            
+            <h3 class="section-title">Memory</h3>
+            
+            <h4>Immediate Recall</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="immediate-recall" id="immediate-recall-intact" value="Intact" checked>
+                    <label for="immediate-recall-intact">Intact</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="immediate-recall" id="immediate-recall-impaired" value="Impaired">
+                    <label for="immediate-recall-impaired">Impaired</label>
+                </div>
+            </div>
+            
+            <h4>Recent Memory</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="recent-memory" id="recent-memory-intact" value="Intact" checked>
+                    <label for="recent-memory-intact">Intact</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="recent-memory" id="recent-memory-impaired" value="Impaired">
+                    <label for="recent-memory-impaired">Impaired</label>
+                </div>
+            </div>
+            
+            <h4>Remote Memory</h4>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="remote-memory" id="remote-memory-intact" value="Intact" checked>
+                    <label for="remote-memory-intact">Intact</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="remote-memory" id="remote-memory-impaired" value="Impaired">
+                    <label for="remote-memory-impaired">Impaired</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="memory-test">Test(s) used</label>
+                <input type="text" id="memory-test" placeholder="e.g., 3-item recall, orientation questions, personal history">
+            </div>
+            
+            <h3 class="section-title">Additional Cognitive Functions</h3>
+            
+            <div class="form-group">
+                <label for="abstract-thinking">Abstract Thinking</label>
+                <select id="abstract-thinking">
+                    <option value="Intact">Intact</option>
+                    <option value="Concrete">Concrete</option>
+                    <option value="Impaired">Impaired</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="fund-knowledge">Fund of Knowledge</label>
+                <select id="fund-knowledge">
+                    <option value="Above average">Above average</option>
+                    <option value="Average">Average</option>
+                    <option value="Below average">Below average</option>
+                    <option value="Poor">Poor</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="cognitive-notes">Additional notes on cognition</label>
+                <textarea id="cognitive-notes" rows="2" placeholder="Additional observations or specific test results"></textarea>
+            </div>
+        </div>
+        
+        <!-- Insight & Judgment Tab -->
+        <div id="insight-tab" class="tab-content">
+            <h3 class="section-title">Insight</h3>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="insight" id="insight-good" value="Good">
+                    <label for="insight-good">Good (Full awareness of illness)</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="insight" id="insight-fair" value="Fair">
+                    <label for="insight-fair">Fair (Partial awareness)</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="insight" id="insight-poor" value="Poor">
+                    <label for="insight-poor">Poor (Minimal awareness)</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="insight" id="insight-absent" value="Absent">
+                    <label for="insight-absent">Absent (No awareness)</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="insight-notes">Notes on insight</label>
+                <textarea id="insight-notes" rows="2" placeholder="Describe patient's understanding of their condition"></textarea>
+            </div>
+            
+            <h3 class="section-title">Judgment</h3>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="judgment" id="judgment-good" value="Good">
+                    <label for="judgment-good">Good</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="judgment" id="judgment-fair" value="Fair">
+                    <label for="judgment-fair">Fair</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="judgment" id="judgment-poor" value="Poor">
+                    <label for="judgment-poor">Poor</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="judgment" id="judgment-impaired" value="Severely impaired">
+                    <label for="judgment-impaired">Severely impaired</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="judgment-notes">Notes on judgment</label>
+                <textarea id="judgment-notes" rows="2" placeholder="Examples of patient's judgment and decision-making"></textarea>
+            </div>
+            
+            <h3 class="section-title">Reliability</h3>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="reliability" id="reliability-good" value="Good">
+                    <label for="reliability-good">Good</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="reliability" id="reliability-fair" value="Fair">
+                    <label for="reliability-fair">Fair</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="reliability" id="reliability-poor" value="Poor">
+                    <label for="reliability-poor">Poor</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="reliability" id="reliability-unknown" value="Unknown">
+                    <label for="reliability-unknown">Unknown</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button type="button" id="generate-report-btn" class="btn-primary">Generate Report</button>
+            <button type="button" id="print-report-btn" class="btn-secondary" style="display: none;">Print Report</button>
+            <button type="button" id="reset-form-btn" class="btn-danger">Reset Form</button>
+        </div>
+        
+        <div id="report-container">
+            <!-- Report will be generated here -->
+        </div>
+    </div>
+    <SCRIPT>
+// Tab functionality
+document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', () => {
+        // Remove active class from all buttons and content
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked button
+        button.classList.add('active');
+        
+        // Show corresponding content
+        const tabId = button.getAttribute('data-tab');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+    });
+});
+
+// Ensure DOM is fully loaded before attaching event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+    
+    // Show/hide suicidal assessment when checkbox is clicked
+    const suicidalCheckbox = document.getElementById('thought-content-suicidal');
+    if (suicidalCheckbox) {
+        suicidalCheckbox.addEventListener('change', function() {
+            const container = document.getElementById('suicidal-assessment-container');
+            if (container) {
+                container.style.display = this.checked ? 'block' : 'none';
+            }
+        });
+    }
+    
+    // Show/hide homicidal assessment when checkbox is clicked
+    const homicidalCheckbox = document.getElementById('thought-content-homicidal');
+    if (homicidalCheckbox) {
+        homicidalCheckbox.addEventListener('change', function() {
+            const container = document.getElementById('homicidal-assessment-container');
+            if (container) {
+                container.style.display = this.checked ? 'block' : 'none';
+            }
+        });
+    }
+    
+    // Set examination date to today by default
+    const examDateInput = document.getElementById('exam-date');
+    if (examDateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        examDateInput.value = today;
+    }
+    
+    // Generate Report
+    const generateReportBtn = document.getElementById('generate-report-btn');
+    if (generateReportBtn) {
+        generateReportBtn.addEventListener('click', generateReport);
+        console.log('Generate report button event listener attached');
+    } else {
+        console.error('Generate report button not found');
+    }
+    
+    // Print Report - FIXED
+    const printReportBtn = document.getElementById('print-report-btn');
+    if (printReportBtn) {
+        printReportBtn.addEventListener('click', function() {
+            console.log('Print button clicked');
+            printReport();
+        });
+        console.log('Print report button event listener attached');
+    } else {
+        console.error('Print report button not found');
+    }
+    
+    // Reset Form
+    const resetFormBtn = document.getElementById('reset-form-btn');
+    if (resetFormBtn) {
+        resetFormBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset the form? All entered data will be lost.')) {
+                location.reload();
+            }
+        });
+    }
+});
+
+// New print function
+function printReport() {
+    try {
+        console.log('Printing report');
+        
+        // Instead of replacing the entire body, create a new window/iframe
+        const printWindow = window.open('', '_blank');
+        
+        if (!printWindow) {
+            alert('Please allow pop-ups for printing functionality');
+            return;
+        }
+        
+        // Get report content
+        const reportContent = document.getElementById('report-container').innerHTML;
+        
+        // Write to the new window with proper styling
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Mental Status Examination Report</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.5;
+                        margin: 20px;
+                    }
+                    .report-header {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .report-section {
+                        margin-bottom: 20px;
+                        break-inside: avoid;
+                    }
+                    .report-item {
+                        margin-bottom: 8px;
+                    }
+                    .report-item-title {
+                        font-weight: bold;
+                    }
+                    h2 {
+                        margin-top: 0;
+                    }
+                    h3 {
+                        border-bottom: 1px solid #ccc;
+                        padding-bottom: 5px;
+                    }
+                    .signature-line, .credentials {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-top: 20px;
+                    }
+                    @media print {
+                        @page {
+                            margin: 2cm;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                ${reportContent}
+            </body>
+            </html>
+        `);
+        
+        // Close the document for writing
+        printWindow.document.close();
+        
+        // Focus the window and print after a short delay to ensure content is loaded
+        printWindow.focus();
+        setTimeout(function() {
+            printWindow.print();
+            // Close the window after printing (optional - can be commented out if you want to keep it open)
+            // printWindow.close();
+        }, 500);
+        
+    } catch (error) {
+        console.error('Error printing report:', error);
+        alert('An error occurred while printing the report: ' + error.message);
+    }
+}
+
+// Helper function to safely get element value
+function safeGetElementValue(id, defaultValue = '') {
+    const element = document.getElementById(id);
+    return element ? (element.value || defaultValue) : defaultValue;
+}
+
+// Fixed: Improved function to get checked items from checkboxes
+function getCheckedItems(name) {
+    try {
+        const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked, input[name^="${name}-"]:checked`);
+        if (!checkboxes || checkboxes.length === 0) {
+            return [];
+        }
+        
+        const items = [];
+        checkboxes.forEach(checkbox => {
+            // If checkbox has a value attribute, use that
+            if (checkbox.value && checkbox.value !== "on") {
+                items.push(checkbox.value);
+            } else {
+                // Otherwise try to get the label text
+                const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                if (label) {
+                    items.push(label.textContent.trim());
+                } else {
+                    // If no label, use the id as fallback
+                    items.push(checkbox.id.replace(/-/g, ' '));
+                }
+            }
+        });
+        return items;
+    } catch (error) {
+        console.error(`Error getting checked items for ${name}:`, error);
+        return [];
+    }
+}
+
+// Helper function to get selected radio button value
+function getRadioValue(name, defaultValue = 'Not documented') {
+    try {
+        const selectedRadio = document.querySelector(`input[name="${name}"]:checked`);
+        if (!selectedRadio) {
+            return defaultValue;
+        }
+        
+        // If radio has a value attribute, use that
+        if (selectedRadio.value && selectedRadio.value !== "on") {
+            return selectedRadio.value;
+        }
+        
+        // Otherwise try to get the label text
+        const label = document.querySelector(`label[for="${selectedRadio.id}"]`);
+        if (label) {
+            return label.textContent.trim();
+        }
+        
+        // If no label, use the id as fallback
+        return selectedRadio.id.replace(/-/g, ' ');
+    } catch (error) {
+        console.error(`Error getting radio value for ${name}:`, error);
+        return defaultValue;
+    }
+}
+
+// Helper function to check if element is checked
+function isElementChecked(id) {
+    const element = document.getElementById(id);
+    return element ? element.checked : false;
+}
+
+// Helper function to directly get checkbox values by ids
+function getCheckboxValues(ids) {
+    try {
+        const values = [];
+        ids.forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox && checkbox.checked) {
+                const label = document.querySelector(`label[for="${id}"]`);
+                if (label) {
+                    values.push(label.textContent.trim());
+                } else if (checkbox.value && checkbox.value !== "on") {
+                    values.push(checkbox.value);
+                } else {
+                    values.push(id.replace(/-/g, ' '));
+                }
+            }
+        });
+        return values;
+    } catch (error) {
+        console.error('Error getting checkbox values:', error);
+        return [];
+    }
+}
+
+// Fixed: Alternative method to get checked items by class or category
+function getCheckedItemsByPrefix(prefix) {
+    try {
+        const checkboxes = document.querySelectorAll(`input[id^="${prefix}"]:checked`);
+        if (!checkboxes || checkboxes.length === 0) {
+            return [];
+        }
+        
+        const items = [];
+        checkboxes.forEach(checkbox => {
+            if (checkbox.value && checkbox.value !== "on") {
+                items.push(checkbox.value);
+            } else {
+                const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                if (label) {
+                    items.push(label.textContent.trim());
+                } else {
+                    items.push(checkbox.id.replace(`${prefix}-`, '').replace(/-/g, ' '));
+                }
+            }
+        });
+        return items;
+    } catch (error) {
+        console.error(`Error getting checked items for prefix ${prefix}:`, error);
+        return [];
+    }
+}
+
+function generateReport() {
+    try {
+        console.log('Starting report generation');
+        
+        const reportContainer = document.getElementById('report-container');
+        if (!reportContainer) {
+            console.error('Report container not found');
+            alert('Error: Report container not found. Please check your HTML.');
+            return;
+        }
+        
+        const printButton = document.getElementById('print-report-btn');
+        
+        // Get patient info
+        const patientName = safeGetElementValue('patient-name', '[Patient Name]');
+        const patientId = safeGetElementValue('patient-id', '[Patient ID]');
+        const patientAge = safeGetElementValue('patient-age', '[Age]');
+        const patientGender = safeGetElementValue('patient-gender', '[Gender]');
+        
+        let examDate = '[Date]';
+        const examDateInput = document.getElementById('exam-date');
+        if (examDateInput && examDateInput.value) {
+            try {
+                examDate = new Date(examDateInput.value).toLocaleDateString();
+            } catch (e) {
+                console.error('Error formatting date:', e);
+                examDate = examDateInput.value;
+            }
+        }
+        
+        const examinerName = safeGetElementValue('examiner-name', '[Examiner Name]');
+        const referralReason = safeGetElementValue('referral-reason', '[Not specified]');
+        
+        console.log('Patient info collected');
+        
+        // Build report HTML
+        let reportHTML = `
+            <div class="report-header">
+                <h2>Mental Status Examination Report</h2>
+                <p>Date: ${examDate}</p>
+            </div>
+            
+            <div class="report-section">
+                <h3>Patient Information</h3>
+                <div class="report-item">
+                    <span class="report-item-title">Name:</span> ${patientName}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">ID:</span> ${patientId}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Age:</span> ${patientAge}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Gender:</span> ${patientGender}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Examiner:</span> ${examinerName}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Reason for Referral:</span> ${referralReason}
+                </div>
+            </div>
+        `;
+        
+        console.log('Building appearance section');
+        // Fixed: Try both methods to get checked items
+        let appearanceItems = getCheckedItems('appearance');
+        let behaviorItems = getCheckedItems('behavior');
+        let attitudeItems = getCheckedItems('attitude');
+        
+        // If the above didn't work, try with prefix method
+        if (appearanceItems.length === 0) {
+            appearanceItems = getCheckedItemsByPrefix('appearance');
+        }
+        if (behaviorItems.length === 0) {
+            behaviorItems = getCheckedItemsByPrefix('behavior');
+        }
+        if (attitudeItems.length === 0) {
+            attitudeItems = getCheckedItemsByPrefix('attitude');
+        }
+        
+        // Debug logging
+        console.log('Appearance items:', appearanceItems);
+        console.log('Behavior items:', behaviorItems);
+        console.log('Attitude items:', attitudeItems);
+        
+        reportHTML += `
+            <div class="report-section">
+                <h3>Appearance and Behavior</h3>
+                <div class="report-item">
+                    <span class="report-item-title">General Appearance:</span> ${appearanceItems.length > 0 ? appearanceItems.join(', ') : 'Not documented'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Behavior & Psychomotor Activity:</span> ${behaviorItems.length > 0 ? behaviorItems.join(', ') : 'Not documented'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Attitude Toward Examiner:</span> ${attitudeItems.length > 0 ? attitudeItems.join(', ') : 'Not documented'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Notes:</span> ${safeGetElementValue('appearance-notes', 'None')}
+                </div>
+            </div>
+        `;
+        
+        console.log('Building mood section');
+        // Fixed: Try both methods to get checked items
+        let moodItems = getCheckedItems('mood');
+        
+        // If the above didn't work, try with prefix method
+        if (moodItems.length === 0) {
+            moodItems = getCheckedItemsByPrefix('mood');
+        }
+        
+        // Debug logging
+        console.log('Mood items:', moodItems);
+        
+        // Get mood affect radios
+        const affectRange = getRadioValue('affect-range');
+        const affectIntensity = getRadioValue('affect-intensity');
+        const affectAppropriateness = getRadioValue('affect-appropriateness');
+        
+        reportHTML += `
+            <div class="report-section">
+                <h3>Mood and Affect</h3>
+                <div class="report-item">
+                    <span class="report-item-title">Reported Mood:</span> ${moodItems.length > 0 ? moodItems.join(', ') : 'Not documented'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Mood as Quoted:</span> "${safeGetElementValue('mood-quoted', 'Not documented')}"
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Affect:</span> 
+                    Range: ${affectRange}, 
+                    Intensity: ${affectIntensity}, 
+                    Appropriateness: ${affectAppropriateness}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Notes:</span> ${safeGetElementValue('affect-notes', 'None')}
+                </div>
+            </div>
+        `;
+        
+        console.log('Building speech section');
+        // Get speech radios
+        const speechRate = getRadioValue('speech-rate');
+        const speechVolume = getRadioValue('speech-volume');
+        const speechQuantity = getRadioValue('speech-quantity');
+        
+        // Fixed: Try both methods to get checked items
+        let languageItems = getCheckedItems('language');
+        
+        // If the above didn't work, try with prefix method
+        if (languageItems.length === 0) {
+            languageItems = getCheckedItemsByPrefix('language');
+        }
+        
+        // Debug logging
+        console.log('Language items:', languageItems);
+        
+        reportHTML += `
+            <div class="report-section">
+                <h3>Speech and Language</h3>
+                <div class="report-item">
+                    <span class="report-item-title">Speech:</span> 
+                    Rate: ${speechRate}, 
+                    Volume: ${speechVolume}, 
+                    Quantity: ${speechQuantity}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Language:</span> ${languageItems.length > 0 ? languageItems.join(', ') : 'Not documented'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Notes:</span> ${safeGetElementValue('speech-notes', 'None')}
+                </div>
+            </div>
+        `;
+        
+        console.log('Building perception section');
+        // Fixed: Try both methods to get checked items
+        let hallucinationItems = getCheckedItems('hallucinations');
+        
+        // If the above didn't work, try with prefix method
+        if (hallucinationItems.length === 0) {
+            hallucinationItems = getCheckedItemsByPrefix('hallucination');
+        }
+        
+        // Debug logging
+        console.log('Hallucination items:', hallucinationItems);
+        
+        // Get perception radios
+        const illusions = getRadioValue('illusions');
+        const depersonalization = getRadioValue('depersonalization');
+        
+        reportHTML += `
+            <div class="report-section">
+                <h3>Perception</h3>
+                <div class="report-item">
+                    <span class="report-item-title">Hallucinations:</span> ${hallucinationItems.length > 0 ? hallucinationItems.join(', ') : 'None reported'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Illusions:</span> ${illusions}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Depersonalization/Derealization:</span> ${depersonalization}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Notes:</span> ${safeGetElementValue('perception-notes', 'None')}
+                </div>
+            </div>
+        `;
+        
+        console.log('Building thought section');
+        // Fixed: Try both methods to get checked items
+        let thoughtProcessItems = getCheckedItems('thought-process');
+        let thoughtContentItems = getCheckedItems('thought-content');
+        
+        // If the above didn't work, try with prefix method
+        if (thoughtProcessItems.length === 0) {
+            thoughtProcessItems = getCheckedItemsByPrefix('thought-process');
+        }
+        if (thoughtContentItems.length === 0) {
+            thoughtContentItems = getCheckedItemsByPrefix('thought-content');
+        }
+        
+        // Debug logging
+        console.log('Thought process items:', thoughtProcessItems);
+        console.log('Thought content items:', thoughtContentItems);
+        
+        let suicidalAssessment = '';
+        if (isElementChecked('thought-content-suicidal')) {
+            suicidalAssessment = `<div class="report-item">
+                <span class="report-item-title">Suicidal Assessment:</span> ${safeGetElementValue('suicidal-assessment', 'Assessed but details not documented')}
+            </div>`;
+        }
+        
+        let homicidalAssessment = '';
+        if (isElementChecked('thought-content-homicidal')) {
+            homicidalAssessment = `<div class="report-item">
+                <span class="report-item-title">Homicidal Assessment:</span> ${safeGetElementValue('homicidal-assessment', 'Assessed but details not documented')}
+            </div>`;
+        }
+        
+        reportHTML += `
+            <div class="report-section">
+                <h3>Thought Process and Content</h3>
+                <div class="report-item">
+                    <span class="report-item-title">Thought Process:</span> ${thoughtProcessItems.length > 0 ? thoughtProcessItems.join(', ') : 'Normal/Not documented'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Thought Content:</span> ${thoughtContentItems.length > 0 ? thoughtContentItems.join(', ') : 'Normal/Not documented'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Notes:</span> ${safeGetElementValue('thought-notes', 'None')}
+                </div>
+                ${suicidalAssessment}
+                ${homicidalAssessment}
+            </div>
+        `;
+        
+        console.log('Building cognition section');
+        // Get consciousness radio
+        const consciousness = getRadioValue('consciousness');
+        
+        // Get orientation checkboxes
+        const orientationItems = [];
+        if (isElementChecked('orientation-person')) orientationItems.push('Person');
+        if (isElementChecked('orientation-place')) orientationItems.push('Place');
+        if (isElementChecked('orientation-time')) orientationItems.push('Time');
+        if (isElementChecked('orientation-situation')) orientationItems.push('Situation');
+        
+        // Get attention and memory radios
+        const attention = getRadioValue('attention');
+        const immediateRecall = getRadioValue('immediate-recall');
+        const recentMemory = getRadioValue('recent-memory');
+        const remoteMemory = getRadioValue('remote-memory');
+        
+        reportHTML += `
+            <div class="report-section">
+                <h3>Cognition</h3>
+                <div class="report-item">
+                    <span class="report-item-title">Level of Consciousness:</span> ${consciousness}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Orientation:</span> ${orientationItems.length > 0 ? 'Oriented to ' + orientationItems.join(', ') : 'Disoriented'}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Attention and Concentration:</span> ${attention} 
+                    ${safeGetElementValue('attention-test') ? '(Tests used: ' + safeGetElementValue('attention-test') + ')' : ''}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Memory:</span> 
+                    Immediate Recall: ${immediateRecall}, 
+                    Recent Memory: ${recentMemory}, 
+                    Remote Memory: ${remoteMemory}
+                    ${safeGetElementValue('memory-test') ? '(Tests used: ' + safeGetElementValue('memory-test') + ')' : ''}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Abstract Thinking:</span> ${safeGetElementValue('abstract-thinking', 'Not documented')}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Fund of Knowledge:</span> ${safeGetElementValue('fund-knowledge', 'Not documented')}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Notes:</span> ${safeGetElementValue('cognitive-notes', 'None')}
+                </div>
+            </div>
+        `;
+        
+        console.log('Building insight section');
+        // Get insight and judgment radios
+        const insight = getRadioValue('insight');
+        const judgment = getRadioValue('judgment');
+        const reliability = getRadioValue('reliability');
+        
+        reportHTML += `
+            <div class="report-section">
+                <h3>Insight and Judgment</h3>
+                <div class="report-item">
+                    <span class="report-item-title">Insight:</span> ${insight}
+                    ${safeGetElementValue('insight-notes') ? ' - ' + safeGetElementValue('insight-notes') : ''}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Judgment:</span> ${judgment}
+                    ${safeGetElementValue('judgment-notes') ? ' - ' + safeGetElementValue('judgment-notes') : ''}
+                </div>
+                <div class="report-item">
+                    <span class="report-item-title">Reliability:</span> ${reliability}
+                </div>
+            </div>
+            
+            <div class="report-section">
+                <h3>Summary and Impressions</h3>
+                <div class="report-item">
+                    ${safeGetElementValue('summary-notes', 'No summary provided.')}
+                </div>
+            </div>
+            
+            <div class="report-section">
+                <h3>Signature</h3>
+                <div class="signature-line">
+                    <div class="report-item">
+                        <span class="report-item-title">Examiner Signature:</span> _____________________________
+                    </div>
+                    <div class="report-item">
+                        <span class="report-item-title">Date:</span> _____________________________
+                    </div>
+                </div>
+                <div class="credentials">
+                    <div class="report-item">
+                        <span class="report-item-title">Credentials:</span> _____________________________
+                    </div>
+                    <div class="report-item">
+                        <span class="report-item-title">License #:</span> _____________________________
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        console.log('Displaying report');
+        // Display the report
+        reportContainer.innerHTML = reportHTML;
+        reportContainer.style.display = 'block';
+        
+        if (printButton) {
+            printButton.style.display = 'inline-block';
+        }
+        
+        // Scroll to the report
+        reportContainer.scrollIntoView({ behavior: 'smooth' });
+        
+        console.log('Report generation complete');
+    } catch (error) {
+        console.error('Error generating report:', error);
+        alert('An error occurred while generating the report: ' + error.message);
+    }
+}
+</SCRIPT>
+</body>
+</HTML>
