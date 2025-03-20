@@ -1097,7 +1097,7 @@
         </div>
     </div>
     <SCRIPT>
-// Tab functionality
+ // Tab functionality
 document.querySelectorAll('.tab-button').forEach(button => {
     button.addEventListener('click', () => {
         // Remove active class from all buttons and content
@@ -1155,7 +1155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Generate report button not found');
     }
     
-    // Print Report - FIXED
+    // Print Report
     const printReportBtn = document.getElementById('print-report-btn');
     if (printReportBtn) {
         printReportBtn.addEventListener('click', function() {
@@ -1178,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// New print function
+// Print function
 function printReport() {
     try {
         console.log('Printing report');
@@ -1268,35 +1268,35 @@ function safeGetElementValue(id, defaultValue = '') {
     return element ? (element.value || defaultValue) : defaultValue;
 }
 
-// Fixed: Improved function to get checked items from checkboxes
-function getCheckedItems(name) {
+// Improved function to get all checked checkboxes by their ID prefix
+function getAllCheckedItemsByPrefix(prefix) {
+    const items = [];
+    
     try {
-        const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked, input[name^="${name}-"]:checked`);
-        if (!checkboxes || checkboxes.length === 0) {
-            return [];
-        }
+        // Get all input elements on the page
+        const allInputs = document.querySelectorAll('input[type="checkbox"]');
         
-        const items = [];
-        checkboxes.forEach(checkbox => {
-            // If checkbox has a value attribute, use that
-            if (checkbox.value && checkbox.value !== "on") {
-                items.push(checkbox.value);
-            } else {
-                // Otherwise try to get the label text
-                const label = document.querySelector(`label[for="${checkbox.id}"]`);
+        // Filter for those that start with the prefix and are checked
+        allInputs.forEach(input => {
+            if (input.id.startsWith(prefix) && input.checked) {
+                // Get the label text if available
+                const label = document.querySelector(`label[for="${input.id}"]`);
                 if (label) {
                     items.push(label.textContent.trim());
+                } else if (input.value && input.value !== "on") {
+                    items.push(input.value);
                 } else {
-                    // If no label, use the id as fallback
-                    items.push(checkbox.id.replace(/-/g, ' '));
+                    items.push(input.id.replace(`${prefix}-`, '').replace(/-/g, ' '));
                 }
             }
         });
-        return items;
+        
+        console.log(`Items found for prefix '${prefix}':`, items);
     } catch (error) {
-        console.error(`Error getting checked items for ${name}:`, error);
-        return [];
+        console.error(`Error getting checked items for prefix ${prefix}:`, error);
     }
+    
+    return items;
 }
 
 // Helper function to get selected radio button value
@@ -1332,55 +1332,20 @@ function isElementChecked(id) {
     return element ? element.checked : false;
 }
 
-// Helper function to directly get checkbox values by ids
-function getCheckboxValues(ids) {
+// Format date as DD/MM/YY
+function formatDateDDMMYY(dateString) {
     try {
-        const values = [];
-        ids.forEach(id => {
-            const checkbox = document.getElementById(id);
-            if (checkbox && checkbox.checked) {
-                const label = document.querySelector(`label[for="${id}"]`);
-                if (label) {
-                    values.push(label.textContent.trim());
-                } else if (checkbox.value && checkbox.value !== "on") {
-                    values.push(checkbox.value);
-                } else {
-                    values.push(id.replace(/-/g, ' '));
-                }
-            }
-        });
-        return values;
-    } catch (error) {
-        console.error('Error getting checkbox values:', error);
-        return [];
-    }
-}
-
-// Fixed: Alternative method to get checked items by class or category
-function getCheckedItemsByPrefix(prefix) {
-    try {
-        const checkboxes = document.querySelectorAll(`input[id^="${prefix}"]:checked`);
-        if (!checkboxes || checkboxes.length === 0) {
-            return [];
-        }
+        const date = new Date(dateString);
+        if (isNaN(date)) return dateString;
         
-        const items = [];
-        checkboxes.forEach(checkbox => {
-            if (checkbox.value && checkbox.value !== "on") {
-                items.push(checkbox.value);
-            } else {
-                const label = document.querySelector(`label[for="${checkbox.id}"]`);
-                if (label) {
-                    items.push(label.textContent.trim());
-                } else {
-                    items.push(checkbox.id.replace(`${prefix}-`, '').replace(/-/g, ' '));
-                }
-            }
-        });
-        return items;
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString().slice(-2);
+        
+        return `${day}/${month}/${year}`;
     } catch (error) {
-        console.error(`Error getting checked items for prefix ${prefix}:`, error);
-        return [];
+        console.error('Error formatting date:', error);
+        return dateString;
     }
 }
 
@@ -1406,12 +1371,7 @@ function generateReport() {
         let examDate = '[Date]';
         const examDateInput = document.getElementById('exam-date');
         if (examDateInput && examDateInput.value) {
-            try {
-                examDate = new Date(examDateInput.value).toLocaleDateString();
-            } catch (e) {
-                console.error('Error formatting date:', e);
-                examDate = examDateInput.value;
-            }
+            examDate = formatDateDDMMYY(examDateInput.value);
         }
         
         const examinerName = safeGetElementValue('examiner-name', '[Examiner Name]');
@@ -1450,26 +1410,22 @@ function generateReport() {
         `;
         
         console.log('Building appearance section');
-        // Fixed: Try both methods to get checked items
-        let appearanceItems = getCheckedItems('appearance');
-        let behaviorItems = getCheckedItems('behavior');
-        let attitudeItems = getCheckedItems('attitude');
+        // Use the improved function to get all checked items
+        let appearanceItems = getAllCheckedItemsByPrefix('appearance');
+        let behaviorItems = getAllCheckedItemsByPrefix('behavior');
+        let attitudeItems = getAllCheckedItemsByPrefix('attitude');
         
-        // If the above didn't work, try with prefix method
-        if (appearanceItems.length === 0) {
-            appearanceItems = getCheckedItemsByPrefix('appearance');
-        }
-        if (behaviorItems.length === 0) {
-            behaviorItems = getCheckedItemsByPrefix('behavior');
-        }
-        if (attitudeItems.length === 0) {
-            attitudeItems = getCheckedItemsByPrefix('attitude');
-        }
+        // Get notes for appearance and behavior
+        const appearanceNotes = safeGetElementValue('appearance-notes', 'None');
+        const behaviorNotes = safeGetElementValue('behavior-notes', 'None');
+        const attitudeNotes = safeGetElementValue('attitude-notes', 'None');
         
-        // Debug logging
-        console.log('Appearance items:', appearanceItems);
-        console.log('Behavior items:', behaviorItems);
-        console.log('Attitude items:', attitudeItems);
+        // Combine notes if needed
+        const combinedNotes = [
+            appearanceNotes !== 'None' ? `Appearance: ${appearanceNotes}` : '',
+            behaviorNotes !== 'None' ? `Behavior: ${behaviorNotes}` : '',
+            attitudeNotes !== 'None' ? `Attitude: ${attitudeNotes}` : ''
+        ].filter(note => note !== '').join('; ');
         
         reportHTML += `
             <div class="report-section">
@@ -1484,22 +1440,14 @@ function generateReport() {
                     <span class="report-item-title">Attitude Toward Examiner:</span> ${attitudeItems.length > 0 ? attitudeItems.join(', ') : 'Not documented'}
                 </div>
                 <div class="report-item">
-                    <span class="report-item-title">Notes:</span> ${safeGetElementValue('appearance-notes', 'None')}
+                    <span class="report-item-title">Notes:</span> ${combinedNotes || 'None'}
                 </div>
             </div>
         `;
         
         console.log('Building mood section');
-        // Fixed: Try both methods to get checked items
-        let moodItems = getCheckedItems('mood');
-        
-        // If the above didn't work, try with prefix method
-        if (moodItems.length === 0) {
-            moodItems = getCheckedItemsByPrefix('mood');
-        }
-        
-        // Debug logging
-        console.log('Mood items:', moodItems);
+        // Use the improved function to get all checked items
+        let moodItems = getAllCheckedItemsByPrefix('mood');
         
         // Get mood affect radios
         const affectRange = getRadioValue('affect-range');
@@ -1533,16 +1481,8 @@ function generateReport() {
         const speechVolume = getRadioValue('speech-volume');
         const speechQuantity = getRadioValue('speech-quantity');
         
-        // Fixed: Try both methods to get checked items
-        let languageItems = getCheckedItems('language');
-        
-        // If the above didn't work, try with prefix method
-        if (languageItems.length === 0) {
-            languageItems = getCheckedItemsByPrefix('language');
-        }
-        
-        // Debug logging
-        console.log('Language items:', languageItems);
+        // Use the improved function to get all checked items
+        let languageItems = getAllCheckedItemsByPrefix('language');
         
         reportHTML += `
             <div class="report-section">
@@ -1563,16 +1503,8 @@ function generateReport() {
         `;
         
         console.log('Building perception section');
-        // Fixed: Try both methods to get checked items
-        let hallucinationItems = getCheckedItems('hallucinations');
-        
-        // If the above didn't work, try with prefix method
-        if (hallucinationItems.length === 0) {
-            hallucinationItems = getCheckedItemsByPrefix('hallucination');
-        }
-        
-        // Debug logging
-        console.log('Hallucination items:', hallucinationItems);
+        // Use the improved function to get all checked items
+        let hallucinationItems = getAllCheckedItemsByPrefix('hallucination');
         
         // Get perception radios
         const illusions = getRadioValue('illusions');
@@ -1597,21 +1529,9 @@ function generateReport() {
         `;
         
         console.log('Building thought section');
-        // Fixed: Try both methods to get checked items
-        let thoughtProcessItems = getCheckedItems('thought-process');
-        let thoughtContentItems = getCheckedItems('thought-content');
-        
-        // If the above didn't work, try with prefix method
-        if (thoughtProcessItems.length === 0) {
-            thoughtProcessItems = getCheckedItemsByPrefix('thought-process');
-        }
-        if (thoughtContentItems.length === 0) {
-            thoughtContentItems = getCheckedItemsByPrefix('thought-content');
-        }
-        
-        // Debug logging
-        console.log('Thought process items:', thoughtProcessItems);
-        console.log('Thought content items:', thoughtContentItems);
+        // Use the improved function to get all checked items
+        let thoughtProcessItems = getAllCheckedItemsByPrefix('thought-process');
+        let thoughtContentItems = getAllCheckedItemsByPrefix('thought-content');
         
         let suicidalAssessment = '';
         if (isElementChecked('thought-content-suicidal')) {
